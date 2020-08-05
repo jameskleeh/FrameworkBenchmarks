@@ -200,8 +200,9 @@ class Metadata:
 
                 # Map test type to a parsed FrameworkTestType object
                 runTests = dict()
-                for type_name, type_obj in self.benchmarker.config.types.iteritems(
-                ):
+
+                # TODO: remove self.benchmarker.config.types
+                for type_name, type_obj in self.benchmarker.config.types.iteritems():
                     try:
                         # Makes a FrameWorkTestType object using some of the keys in config
                         # e.g. JsonTestType uses "json_url"
@@ -234,12 +235,12 @@ class Metadata:
 
         return tests
 
-    def list_test_metadata(self):
+    def to_jsonable(self):
         '''
-        Prints the metadata for all the available tests
+        Returns an array suitable for jsonification
         '''
         all_tests = self.gather_tests()
-        all_tests_json = json.dumps(map(lambda test: {
+        return map(lambda test: {
             "project_name": test.project_name,
             "name": test.name,
             "approach": test.approach,
@@ -256,7 +257,13 @@ class Metadata:
             "notes": test.notes,
             "versus": test.versus,
             "tags": hasattr(test, "tags") and test.tags or []
-        }, all_tests))
+        }, all_tests)
+
+    def list_test_metadata(self):
+        '''
+        Prints the metadata for all the available tests
+        '''
+        all_tests_json = json.dumps(self.to_jsonable())
 
         with open(
                 os.path.join(self.benchmarker.results.directory,
